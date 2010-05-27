@@ -9,6 +9,15 @@ import re
 import redis 
 from abc import ABCMeta, abstractmethod
 
+config = ConfigParser.RawConfigParser()
+config.read("../../etc/whois-server.conf")
+root_dir =  config.get('global','root')
+whois_db = os.path.join(root_dir, config.get('global','whois_db'))
+unpack_dir = os.path.join(root_dir, config.get('whois_server','unpack_dir'))
+use_tmpfs = int(config.get('whois_server','use_tmpfs'))
+sys.path.append(os.path.join(root_dir,config.get('global','lib')))
+
+
 class InitWhoisServer:
     """
     Generic functions to initialize the redis database for a particular whois server. 
@@ -82,31 +91,25 @@ class InitWhoisServer:
                 print first_set
                 print last_set
                 break
-        if i < len(first_index) and i < len(last_index) and first_index[i] != '' and last_index[i] != '':
-            hex_first = int('0x' + first_index[i], 16)
-            hex_last = int('0x' + last_index[i], 16)
-            while hex_first <= hex_last:
-                key_end = ('%X' % hex_first).lower()
-                intermediate.append(key + ':' + key_end)
-                hex_first += 1
-            i += 1
-        else:
-            intermediate.append(key)
+#        if i < len(first_index) and i < len(last_index) and first_index[i] != '' and last_index[i] != '':
+#            hex_first = int('0x' + first_index[i], 16)
+#            hex_last = int('0x' + last_index[i], 16)
+#            while hex_first <= hex_last:
+#                key_end = ('%X' % hex_first).lower()
+#                intermediate.append(key + ':' + key_end)
+#                hex_first += 1
+#            i += 1
+#        else:
+        intermediate.append(key)
         return intermediate
 
     def __init__(self):
-        self.config = ConfigParser.RawConfigParser()
-        self.config.read("../../etc/bgp-ranking.conf")
-        self.root_dir =  self.config.get('global','root')
-        self.whois_db = os.path.join(self.root_dir, self.config.get('global','whois_db'))
-        self.unpack_dir = os.path.join(self.root_dir, self.config.get('whois_server','unpack_dir'))
-        self.use_tmpfs = int(self.config.get('whois_server','use_tmpfs'))
-        if self.use_tmpfs:
-            tmpfs_size = self.config.get('whois_server','tmpfs_size')
+        if use_tmpfs:
+            tmpfs_size = config.get('whois_server','tmpfs_size')
             if not os.path.ismount(unpack_dir):
 #                print('Mount the tmpfs directory')
-                os.popen('mount -t tmpfs -o size=' + tmpfs_size + ' tmpfs ' + self.unpack_dir)
-        self.extracted = os.path.join(self.unpack_dir,self.dump_name)
+                os.popen('mount -t tmpfs -o size=' + tmpfs_size + ' tmpfs ' + unpack_dir)
+        self.extracted = os.path.join(unpack_dir,self.dump_name)
 
     def start(self):
 #        self.prepare()
@@ -129,7 +132,8 @@ class InitWhoisServer:
                     if entries is not None:
                         entries.append(entry)
                     else:
-                        print entry
+                        pass
+#                        print entry
                 entry = ''
                 self.pending_keys += 1
                 if self.pending_keys >= self.max_pending_keys:
@@ -137,20 +141,20 @@ class InitWhoisServer:
             else :
                 entry += line
     
-    def push_into_db(self):
-        self.redis_whois_server = redis.Redis(db=int(self.config.get('whois_server','redis_db')) )
-        for key,entries in self.keys:
-#            print('Begin' + key)
-            while len(entries) > 0 :
-                entry = entries.pop()
-                # TODO: be sure that if the key is on two lines (some inetnum), it works 
-                redis_key = re.findall(key + '[ \t]*(.*)', entry)[0]
-                self.redis_whois_server.set(redis_key, entry)
-                self.push_helper_keys(key, redis_key, entry)
-        self.pending_keys = 0
+#    def push_into_db(self):
+#        self.redis_whois_server = redis.Redis(db=int(self.config.get('whois_server','redis_db')) )
+#        for key,entries in self.keys:
+##            print('Begin' + key)
+#            while len(entries) > 0 :
+#                entry = entries.pop()
+#                # TODO: be sure that if the key is on two lines (some inetnum), it works 
+#                redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
+#                self.redis_whois_server.set(redis_key, entry)
+#                self.push_helper_keys(key, redis_key, entry)
+#        self.pending_keys = 0
     
     def clean_system(self):
-        if self.use_tmpfs:
+        if use_tmpfs:
             if os.path.ismount(self.unpack_dir) is not None:
                 print('Umount the tmpfs directory')
                 os.popen('umount ' + self.unpack_dir)

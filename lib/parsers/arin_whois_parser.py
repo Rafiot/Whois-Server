@@ -3,17 +3,6 @@
 # Original Idea :
 # =>  http://code.google.com/p/pywhois/source/browse/trunk/pywhois/parser.py
 
-
-import os 
-import sys
-import ConfigParser
-config = ConfigParser.RawConfigParser()
-config.read("../../etc/bgp-ranking.conf")
-root_dir = config.get('global','root')
-sys.path.append(os.path.join(root_dir,config.get('global','lib')))
-
-from whois_parser.abstract_whois import AbstractWhoisParser
-
 import re
 
 # Dict entries 
@@ -28,7 +17,7 @@ all_possible_keys.update(parent)
 all_possible_keys.update(netrange)
 all_possible_keys.update(pochandles)
 
-class ARINWhois(AbstractWhoisParser):
+class ARINWhois():
     """
     This class return a dump of the Whois. 
     Til we have a real implementation of whois in python, 
@@ -64,3 +53,6 @@ class ARINWhois(AbstractWhoisParser):
                 return getattr(self, attr)
             else:
                 raise KeyError("Unknown attribute: %s" % attr)
+
+    def __repr__(self):
+        return self.text
