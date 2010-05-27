@@ -48,6 +48,14 @@ class InitWhoisServer:
             intermediate = self.__intermediate_sets_v6(first_set, last_set)
         return intermediate
 
+    def push_list_at_key(self, mylist, redis_key, flag, subkey):
+        mylist = filter(None, mylist)
+        mylist = list(set(mylist))
+        main_key = redis_key + flag
+        for elt in mylist:
+            self.redis_whois_server.sadd(main_key, elt)
+            self.redis_whois_server.sadd(elt + subkey, redis_key)
+
     def __intermediate_sets_v4(self, first_set, last_set):
         intermediate = []
         first_index = first_set.split('.')
@@ -140,18 +148,6 @@ class InitWhoisServer:
                     self.push_into_db()
             else :
                 entry += line
-    
-#    def push_into_db(self):
-#        self.redis_whois_server = redis.Redis(db=int(self.config.get('whois_server','redis_db')) )
-#        for key,entries in self.keys:
-##            print('Begin' + key)
-#            while len(entries) > 0 :
-#                entry = entries.pop()
-#                # TODO: be sure that if the key is on two lines (some inetnum), it works 
-#                redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
-#                self.redis_whois_server.set(redis_key, entry)
-#                self.push_helper_keys(key, redis_key, entry)
-#        self.pending_keys = 0
     
     def clean_system(self):
         if use_tmpfs:

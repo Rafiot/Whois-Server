@@ -86,15 +86,6 @@ class InitRIPE(InitWhoisServer):
  
     def  copy_serial(self):
         shutil.copy(self.serial,self.last_parsed_serial)
-    
-
-    def push_list_at_key(self, mylist, redis_key, flag, subkey):
-        mylist = filter(None, mylist)
-        mylist = list(set(mylist))
-        main_key = redis_key + flag
-        for elt in mylist:
-            self.redis_whois_server.sadd(main_key, elt)
-            self.redis_whois_server.sadd(elt + subkey, redis_key)
 
     def split_inline_AS(self, list):
         asn = []
@@ -162,15 +153,17 @@ class InitRIPE(InitWhoisServer):
 #        print parser
         self.push_list_at_key(persons, redis_key, self.persons_flag, subkey)
     
-    def push_origin(self, parser, redis_key):
+    def push_origin(self, parser, redis_key, subkey):
         origin = parser.origin
         if origin is not None:
-            self.redis_whois_server.sadd(redis_key + self.origin_flag, origin[0])
+#            self.redis_whois_server.sadd(redis_key + self.origin_flag, origin[0])
+            self.push_list_at_key(origin, redis_key, self.origin_flag, subkey)    
     
-    def push_irt(self, parser, redis_key):
+    def push_irt(self, parser, redis_key, subkey):
         irt = parser.mnt_irt
         if irt is not None:
-            self.redis_whois_server.sadd(redis_key + self.irt_flag, irt[0])
+#            self.redis_whois_server.sadd(redis_key + self.irt_flag, irt[0])
+            self.push_list_at_key(irt, redis_key, self.irt_flag, subkey)
     
     def push_diverses_aut_num(self, parser, redis_key, subkey):
         aut_nums = []
@@ -196,8 +189,8 @@ class InitRIPE(InitWhoisServer):
         self.push_mntners(parser, redis_key, subkey)
         self.push_persons(parser, redis_key, subkey)
         self.push_diverses_aut_num(parser, redis_key, subkey)
-        self.push_origin(parser, redis_key)
-        self.push_irt(parser, redis_key)
+        self.push_origin(parser, redis_key, subkey)
+        self.push_irt(parser, redis_key, subkey)
 
     def ugly_fix_false_ips(self, subnet):
         # Hack in case the subnet is false in the db...

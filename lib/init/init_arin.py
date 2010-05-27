@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from abstract_init_whois_server import InitWhoisServer
-from arin_whois_parser import *
+from abstract_init_whois_server import *
+from parsers.arin_whois_parser import *
 
 import IPy
-
+import redis
 
 class InitARIN(InitWhoisServer):
     
@@ -20,12 +20,12 @@ class InitARIN(InitWhoisServer):
     orgid_flag = ':orgid'
     parent_flag = ':parent'
     
-    keys =  [
-        [net    , [] ], 
-        [orgid  , [] ], 
-        [v6net  , [] ],
-        [ash    , [] ],
-        [poc    , [] ] ]
+    keys =  {
+        net    : [] , 
+        orgid  : [] , 
+        v6net  : [] ,
+        ash    : [] ,
+        poc    : []  }
         
     archive_name = "arin_db.txt.gz"
     dump_name = "arin_db.txt"
@@ -33,38 +33,29 @@ class InitARIN(InitWhoisServer):
     def __init__(self):
         InitWhoisServer.__init__(self)
     
-    def __push_poc(self, parser, redis_key):
-       if parser.pochandles:
-            # remove duplicate and join each elements separated by 'separator'
-           pocs = self.separator.join(list(set(parser.pochandles)))
-           self.redis_whois_server.set(redis_key + self.pocs_flag, pocs)
-    
-    def __push_origid(self, parser, redis_key):
-        orgid = parser.orgid[0]
-        self.redis_whois_server.set(redis_key + self.orgid_flag, orgid)
-        
-    def __push_parent(self, parser, redis_key):
+    def push_poc(self, parser, redis_key, subkey):
+        pochandles = parser.pochandles
+        if pochandles is not None:
+            self.push_list_at_key(pochandles, redis_key, self.pocs_flag, subkey)
+
+    def push_origid(self, parser, redis_key, subkey):
+        orgid = parser.orgid
+        if orgid is not None:
+            self.push_list_at_key(orgid, redis_key, self.orgid_flag, subkey)
+
+    def push_parent(self, parser, redis_key, subkey):
         parent = parser.parent
-        if parent:
-            self.redis_whois_server.set(redis_key + self.parent_flag, parent[0])
+        if parent is not None:
+            self.push_list_at_key(parent, redis_key, self.parent_flag, subkey)
 
     def push_helper_keys(self, key, redis_key, entry):
-       parser = ARINWhois(entry,  key)
-       if key == self.orgid:
-            self.__push_poc(parser, redis_key)
-       elif key == self.net:
-           self.__push_poc(parser, redis_key)
-           self.__push_origid(parser, redis_key)
-           self.__push_parent(parser, redis_key)
-           self.__push_range(parser, redis_key)
-       elif key == self.v6net:
-           self.__push_poc(parser, redis_key)
-           self.__push_origid(parser, redis_key)
-           self.__push_parent(parser, redis_key)
-           self.__push_range(parser, redis_key)
-       elif key == self.ash:
-           self.__push_poc(parser, redis_key)
-           self.__push_origid(parser, redis_key)
+        parser = ARINWhois(entry,  key)
+        if key == self.net or key == self.v6net:
+            self.__push_range(parser, redis_key)
+        subkey = ':' + key[1:-1]
+        self.push_poc(parser, redis_key, subkey)
+        self.push_origid(parser, redis_key, subkey)
+        self.push_parent(parser, redis_key, subkey)
 
     def __push_range(self, parser, net_key):
         first = IPy.IP(parser.netrange[0][0])
@@ -74,6 +65,18 @@ class InitARIN(InitWhoisServer):
         else:
             ipv4 = False
         self.push_range(first, last, net_key, ipv4)
+
+    def push_into_db(self):
+        self.redis_whois_server = redis.Redis(db=int(config.get('whois_server','redis_db')) )
+        for key, entries in self.keys.iteritems():
+#            print('Begin' + key)
+            while len(entries) > 0 :
+                entry = entries.pop()
+                # TODO: be sure that if the key is on two lines (some inetnum), it works 
+                redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
+                self.redis_whois_server.set(redis_key, entry)
+                self.push_helper_keys(key, redis_key, entry)
+        self.pending_keys = 0
 
 
 if __name__ == "__main__":

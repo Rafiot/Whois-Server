@@ -5,11 +5,14 @@
 
 import re
 
+
+regex_ending = ':[\s]*([^{#\n]*)'
+
 # Dict entries 
-pochandles  = { 'pochandles' : '(?:TechHandle|AbuseHandle|NOCHandle|OrgTechHandle|OrgAbuseHandle|OrgNOCHandle|OrgAdminHandle):[ ]*(.*)' }
-orgid       = { 'orgid'      : 'OrgID:[ ]*(.*)' }
-parent      = { 'parent'     : 'Parent:[ ]*(.*)' }
-netrange    = { 'netrange'   : 'NetRange:[ ]*(.*) - (.*)' }
+pochandles  = { 'pochandles' : '\n(?:TechHandle|AbuseHandle|NOCHandle|OrgTechHandle|OrgAbuseHandle|OrgNOCHandle|OrgAdminHandle)' + regex_ending }
+orgid       = { 'orgid'      : '\nOrgID' + regex_ending }
+parent      = { 'parent'     : '\nParent' + regex_ending }
+netrange    = { 'netrange'   : '\nNetRange:[ ]*(.*) - (.*)' }
 
 all_possible_keys = {}
 all_possible_keys.update(orgid)
