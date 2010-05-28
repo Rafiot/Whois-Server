@@ -96,8 +96,6 @@ class InitWhoisServer:
             key += first_index[i]
             i += 1
             if i == len(first_index) or i == len(last_index):
-                print first_set
-                print last_set
                 break
 #        if i < len(first_index) and i < len(last_index) and first_index[i] != '' and last_index[i] != '':
 #            hex_first = int('0x' + first_index[i], 16)

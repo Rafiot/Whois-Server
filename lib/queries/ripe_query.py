@@ -2,22 +2,28 @@
 # -*- coding: utf-8 -*-
 # Needs redis-py from git! the stable version has a bug in keys()
 
+import IPy
+import re
+
 from abstract_whois_query import WhoisQuery
 
-class ARINQuery(WhoisQuery):
+class RIPEQuery(WhoisQuery):
     
     # subkeys
-    pocs_flag = ':pocs'
-    orgid_flag = ':orgid'
-    parent_flag = ':parent'
-    subkeys = [ pocs_flag, orgid_flag, parent_flag ]
+    mntners_flag = ':mntners'
+    persons_flag = ':persons'
+    roles_flag = ':roles'
+    aut_nums_flag = ':autnums'
+    
+    origin_flag = ':origin'
+    irt_flag = ':irt'
+    subkeys = [ mntners_flag, persons_flag, roles_flag, aut_nums_flag, origin_flag, irt_flag ]
     
     
 if __name__ == "__main__":
     import os 
-    import IPy
     import sys
-    query_maker = ARINQuery()
+    query_maker = RIPEQuery()
     
     def usage():
         print "arin_query.py query"

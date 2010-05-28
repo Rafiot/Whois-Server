@@ -71,7 +71,7 @@ class InitRIPE(InitWhoisServer):
     nic_keys = [ person , role ]    
 
     archive_name = "ripe.db.dummy.gz"
-    dump_name = "ripe.db.inet6num"
+    dump_name = "ripe.db.dummy"
     serial = "RIPE.CURRENTSERIAL"
 
     def __init__(self):

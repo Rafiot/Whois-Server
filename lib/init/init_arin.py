@@ -14,11 +14,12 @@ class InitARIN(InitWhoisServer):
     v6net = '^V6NetHandle:'
     ash = '^ASHandle:'
     poc = '^POCHandle:'
-    
-    separator = ' '
+
+
     pocs_flag = ':pocs'
     orgid_flag = ':orgid'
     parent_flag = ':parent'
+    subkeys = [ pocs_flag, orgid_flag, parent_flag ]
     
     keys =  {
         net    : [] , 
@@ -69,7 +70,7 @@ class InitARIN(InitWhoisServer):
     def push_into_db(self):
         self.redis_whois_server = redis.Redis(db=int(config.get('whois_server','redis_db')) )
         for key, entries in self.keys.iteritems():
-#            print('Begin' + key)
+            print('Begin' + key)
             while len(entries) > 0 :
                 entry = entries.pop()
                 # TODO: be sure that if the key is on two lines (some inetnum), it works 
