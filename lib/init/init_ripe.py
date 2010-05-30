@@ -50,7 +50,7 @@ class InitRIPE(InitWhoisServer):
          aut_num       : [] ,
          route         : [] ,
          route6        : [] ,
-         as_block      : [] , # Not used for now.
+         as_block      : [] , #FIXME: Not used for now.
          as_set        : [] ,
          rtr_set       : [] ,
          route_set     : [] ,
@@ -69,9 +69,10 @@ class InitRIPE(InitWhoisServer):
          role          : []  }
 
     nic_keys = [ person , role ]    
+    range_keys = [ inetnum , inet6num ]  
 
     archive_name = "ripe.db.dummy.gz"
-    dump_name = "ripe.db.dummy"
+    dump_name = "ripe.dummy.person"
     serial = "RIPE.CURRENTSERIAL"
 
     def __init__(self):
@@ -89,108 +90,55 @@ class InitRIPE(InitWhoisServer):
 
     def split_inline_AS(self, list):
         asn = []
-        for l in list:
-            str = re.findall('(?:(?:AS|as)([\d\w-]*))',l)
-            for s in str:
-                s = 'AS' + s
-            asn.extend(str)
+        if list is not None:
+          for l in list:
+              str = re.findall('(?:(?:AS|as)([\d\w-]*))',l)
+              for s in str:
+                  s = 'AS' + s
+              asn.extend(str)
         return asn
     
     def split_inline_mnt(self, list):
         mnt = []
-        for l in list:
-            str = re.split('[ ,]*', l)
-#            str = re.findall('(RIPE-[\d\w]*-MNT)',l)
-            mnt.extend(str)
+        if list is not None:
+          for l in list:
+              str = re.split('[ ,]*', l)
+  #            str = re.findall('(RIPE-[\d\w]*-MNT)',l)
+              mnt.extend(str)
         return mnt
 
     def split_inline_persons(self, list):
         persons = []
-        for l in list:
-            str = re.split('[ ,]*', l)
-#            str = re.findall('([\d\w]*-RIPE)',l)  
-            persons.extend(str)
+        if list is not None:
+          for l in list:
+              str = re.split('[ ,]*', l)
+  #            str = re.findall('([\d\w]*-RIPE)',l)  
+              persons.extend(str)
         return persons
 
-    def push_mntners(self, parser, redis_key, subkey):
-        mntners = []
-        mnt_by = parser.mnt_by
-        mnt_lower = parser.mnt_lower
-        mnt_routes = parser.mnt_routes
-        mnt_ref = parser.mnt_ref
-        if mnt_by is not None:
-            mnt_by = self.split_inline_mnt(mnt_by)
-            mntners.extend(mnt_by)
-        if mnt_lower is not None:
-            mnt_lower = self.split_inline_mnt(mnt_lower)
-            mntners.extend(mnt_lower)
-        if mnt_routes is not None:
-            mnt_routes = self.split_inline_mnt(mnt_routes)
-            mntners.extend(mnt_routes)
-        if mnt_ref is not None:
-            mnt_ref = self.split_inline_mnt(mnt_ref)
-            mntners.extend(mnt_ref)
-        self.push_list_at_key(mntners, redis_key, self.mntners_flag, subkey)
-
-    def push_persons(self, parser, redis_key, subkey):
-        persons = []
-        tech_c = parser.tech_c
-        admin_c = parser.admin_c
-        author = parser.author
-        zone_c = parser.zone_c
-        if tech_c is not None:
-            tech_c = self.split_inline_persons(tech_c)
-            persons.extend(tech_c)
-        if admin_c is not None:
-            admin_c = self.split_inline_persons(admin_c)
-            persons.extend(admin_c)
-        if author is not None:
-            author = self.split_inline_persons(author)
-            persons.extend(author)
-        if zone_c is not None:
-            zone_c = self.split_inline_persons(zone_c)
-            persons.extend(zone_c)
-#        print parser
-        self.push_list_at_key(persons, redis_key, self.persons_flag, subkey)
-    
-    def push_origin(self, parser, redis_key, subkey):
-        origin = parser.origin
-        if origin is not None:
-#            self.redis_whois_server.sadd(redis_key + self.origin_flag, origin[0])
-            self.push_list_at_key(origin, redis_key, self.origin_flag, subkey)    
-    
-    def push_irt(self, parser, redis_key, subkey):
-        irt = parser.mnt_irt
-        if irt is not None:
-#            self.redis_whois_server.sadd(redis_key + self.irt_flag, irt[0])
-            self.push_list_at_key(irt, redis_key, self.irt_flag, subkey)
-    
-    def push_diverses_aut_num(self, parser, redis_key, subkey):
-        aut_nums = []
-        members = parser.members
-        local_as = parser.local_as
-        if members is not None:
-            members = self.split_inline_AS(members)
-            aut_nums.extend(members)
-        if local_as is not None:
-            local_as = self.split_inline_AS(local_as)
-            aut_nums.extend(local_as)
-        self.push_list_at_key(aut_nums, redis_key, self.aut_nums_flag, subkey)
-
     def push_helper_keys(self, key, redis_key, entry):
-        parser = RIPEWhois(entry,  key)
+        parser = RIPEWhois(entry)
+        subkey = ':' + key[1:-1]
         if key == self.inetnum:
             self.ipv4 = True
             self.__push_range_v4(parser, redis_key)
         elif key == self.inet6num:
             self.ipv4 = False
             self.__push_range_v6(parser, redis_key)
-        subkey = ':' + key[1:-1]
-        self.push_mntners(parser, redis_key, subkey)
-        self.push_persons(parser, redis_key, subkey)
-        self.push_diverses_aut_num(parser, redis_key, subkey)
-        self.push_origin(parser, redis_key, subkey)
-        self.push_irt(parser, redis_key, subkey)
+        
+        if key not in self.nic_keys :
+            persons = self.split_inline_persons(parser.persons)
+            self.push_entry(persons, redis_key, self.persons_flag, subkey)
+        if key != self.irt:
+            self.push_entry(parser.mnt_irt, redis_key, self.irt_flag, subkey)
+        if key != self.mntner:
+            mntners = self.split_inline_mnt(parser.mntners)
+            self.push_entry(mntners, redis_key, self.mntners_flag, subkey)
+        if key != self.aut_num:
+            aut_nums = self.split_inline_persons(parser.aut_nums)
+            self.push_entry(aut_nums, redis_key, self.aut_nums_flag, subkey)
+        
+        self.push_entry(parser.origin, redis_key, self.origin_flag, subkey)
 
     def ugly_fix_false_ips(self, subnet):
         # Hack in case the subnet is false in the db...
@@ -239,11 +187,15 @@ class InitRIPE(InitWhoisServer):
         for key, entries in self.keys.iteritems():
 #            print('Begin' + key)
             while len(entries) > 0 :
+                redis_key = ''
                 entry = entries.pop()
                 if key in self.nic_keys:
-                    redis_key = re.findall('nic-hdl:[\s]*([^\s]*)', entry)[0]
+                    redis_key = re.findall('\nnic-hdl:[\s]*([^\s]*)', entry)[0]
                     redis_key += ':' + key[1:-1]
-                    self.redis_whois_server.sadd(redis_key, entry)
+                    self.redis_whois_server.set(redis_key, entry)
+                elif key in self.range_keys:
+                    redis_key = 'range:' + str(self.redis_whois_server.incr(uniq_range_id))
+                    self.redis_whois_server.set(redis_key, entry)
                 else:
                     redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
                     self.redis_whois_server.set(redis_key, entry)

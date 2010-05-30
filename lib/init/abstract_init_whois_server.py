@@ -17,6 +17,8 @@ unpack_dir = os.path.join(root_dir, config.get('whois_server','unpack_dir'))
 use_tmpfs = int(config.get('whois_server','use_tmpfs'))
 sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 
+uniq_range_id = 'range_id'
+
 
 class InitWhoisServer:
     """
@@ -48,6 +50,11 @@ class InitWhoisServer:
             intermediate = self.__intermediate_sets_v6(first_set, last_set)
         return intermediate
 
+    def push_entry(self, entry, redis_key, flag, subkey):
+        if entry is not None:
+            self.push_list_at_key(entry, redis_key, flag, subkey)
+    
+    
     def push_list_at_key(self, mylist, redis_key, flag, subkey):
         mylist = filter(None, mylist)
         mylist = list(set(mylist))

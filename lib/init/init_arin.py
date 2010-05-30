@@ -7,10 +7,12 @@ from parsers.arin_whois_parser import *
 import IPy
 import redis
 
+
+
 class InitARIN(InitWhoisServer):
     
     orgid = '^OrgID:'
-    net = '^NetHandle:'
+    net = '^net:'
     v6net = '^V6NetHandle:'
     ash = '^ASHandle:'
     poc = '^POCHandle:'
@@ -33,30 +35,15 @@ class InitARIN(InitWhoisServer):
 
     def __init__(self):
         InitWhoisServer.__init__(self)
-    
-    def push_poc(self, parser, redis_key, subkey):
-        pochandles = parser.pochandles
-        if pochandles is not None:
-            self.push_list_at_key(pochandles, redis_key, self.pocs_flag, subkey)
-
-    def push_origid(self, parser, redis_key, subkey):
-        orgid = parser.orgid
-        if orgid is not None:
-            self.push_list_at_key(orgid, redis_key, self.orgid_flag, subkey)
-
-    def push_parent(self, parser, redis_key, subkey):
-        parent = parser.parent
-        if parent is not None:
-            self.push_list_at_key(parent, redis_key, self.parent_flag, subkey)
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = ARINWhois(entry,  key)
+        parser = ARINWhois(entry)
         if key == self.net or key == self.v6net:
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]
-        self.push_poc(parser, redis_key, subkey)
-        self.push_origid(parser, redis_key, subkey)
-        self.push_parent(parser, redis_key, subkey)
+        self.push_entry(parser.pochandles, pocs_flag, redis_key, subkey)
+        self.push_entry(parser.orgid, orgid_flag, redis_key, subkey)
+        self.push_entry(parser.parent, parent_flag, redis_key, subkey)
 
     def __push_range(self, parser, net_key):
         first = IPy.IP(parser.netrange[0][0])
@@ -73,8 +60,10 @@ class InitARIN(InitWhoisServer):
             print('Begin' + key)
             while len(entries) > 0 :
                 entry = entries.pop()
-                # TODO: be sure that if the key is on two lines (some inetnum), it works 
-                redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
+                if key == net or key == v6net:
+                    redis_key = 'range:' + str(self.redis_whois_server.incr(uniq_range_id))
+                else:
+                    redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
                 self.redis_whois_server.set(redis_key, entry)
                 self.push_helper_keys(key, redis_key, entry)
         self.pending_keys = 0
