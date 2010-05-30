@@ -62,6 +62,12 @@ class InitWhoisServer:
         for elt in mylist:
             self.redis_whois_server.sadd(main_key, elt)
             self.redis_whois_server.sadd(elt + subkey, redis_key)
+        
+        ## I thought it would be faster... it seems not !
+        #pipeline = self.redis_whois_server.pipeline()
+        #for elt in mylist:
+            #pipeline = pipeline.sadd(main_key, elt).sadd(elt + subkey, redis_key)
+        #pipeline.execute()
 
     def __intermediate_sets_v4(self, first_set, last_set):
         intermediate = []

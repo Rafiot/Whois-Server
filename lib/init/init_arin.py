@@ -41,8 +41,11 @@ class InitARIN(InitWhoisServer):
         if key == self.net or key == self.v6net:
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]
-        self.push_entry(parser.pochandles, pocs_flag, redis_key, subkey)
-        self.push_entry(parser.orgid, orgid_flag, redis_key, subkey)
+        #TODO: test it !
+        if key != poc:
+            self.push_entry(parser.pochandles, pocs_flag, redis_key, subkey)
+        if key != orgid:
+            self.push_entry(parser.orgid, orgid_flag, redis_key, subkey)
         self.push_entry(parser.parent, parent_flag, redis_key, subkey)
 
     def __push_range(self, parser, net_key):
