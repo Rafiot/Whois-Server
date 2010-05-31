@@ -12,7 +12,7 @@ import redis
 class InitARIN(InitWhoisServer):
     
     orgid = '^OrgID:'
-    net = '^net:'
+    net = '^NetHandle:'
     v6net = '^V6NetHandle:'
     ash = '^ASHandle:'
     poc = '^POCHandle:'
@@ -42,11 +42,11 @@ class InitARIN(InitWhoisServer):
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]
         #TODO: test it !
-        if key != poc:
-            self.push_entry(parser.pochandles, pocs_flag, redis_key, subkey)
-        if key != orgid:
-            self.push_entry(parser.orgid, orgid_flag, redis_key, subkey)
-        self.push_entry(parser.parent, parent_flag, redis_key, subkey)
+        if key != self.poc:
+            self.push_entry(parser.pochandles, redis_key, self.pocs_flag, subkey)
+        if key != self.orgid:
+            self.push_entry(parser.orgid, redis_key, self.orgid_flag, subkey)
+        self.push_entry(parser.parent, redis_key, self.parent_flag, subkey)
 
     def __push_range(self, parser, net_key):
         first = IPy.IP(parser.netrange[0][0])
@@ -63,7 +63,7 @@ class InitARIN(InitWhoisServer):
             print('Begin' + key)
             while len(entries) > 0 :
                 entry = entries.pop()
-                if key == net or key == v6net:
+                if key == self.net or key == self.v6net:
                     redis_key = 'range:' + str(self.redis_whois_server.incr(uniq_range_id))
                 else:
                     redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]

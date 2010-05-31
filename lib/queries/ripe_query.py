@@ -5,7 +5,7 @@
 import IPy
 import re
 
-from abstract_whois_query import WhoisQuery
+from whois_query import WhoisQuery
 
 class RIPEQuery(WhoisQuery):
     

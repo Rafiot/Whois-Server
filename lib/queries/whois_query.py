@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import redis
-import ConfigParser
-config = ConfigParser.RawConfigParser()
-config.read("../../etc/whois-server.conf")
 
 import IPy
 import re
@@ -22,22 +19,21 @@ class WhoisQuery():
     persons_flag = ':persons'
     roles_flag = ':roles'
     aut_nums_flag = ':autnums'
-    
     origin_flag = ':origin'
     irt_flag = ':irt'
     subkeys_ripe = [ mntners_flag, persons_flag, roles_flag, aut_nums_flag, origin_flag, irt_flag ]
     
     subkeys = subkeys_arin + subkeys_ripe
     
-    def __init__(self):
-        self.redis_whois_server = redis.Redis(db=int(config.get('whois_server','redis_db')) )
+    def __init__(self,  redis_db):
+        self.redis_whois_server = redis.Redis(db= redis_db)
     
     def whois_asn(self, query):
         to_return = self.redis_whois_server.get(query)
         if not to_return:
             to_return = 'ASN not found.'
-        else:
-            to_return += self.get_all_informations(query)
+#        else:
+#            to_return += self.get_all_informations(query)
         return to_return
 
     def __find_best_range(self, ip):
@@ -98,7 +94,10 @@ if __name__ == "__main__":
     import os 
     import IPy
     import sys
-    query_maker = WhoisQuery()
+    import ConfigParser
+    config = ConfigParser.RawConfigParser()
+    config.read("../../etc/whois-server.conf")
+    query_maker = WhoisQuery(int(config.get('whois_server','redis_db')))
     
     def usage():
         print "arin_query.py query"

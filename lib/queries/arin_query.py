@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Needs redis-py from git! the stable version has a bug in keys()
 
-from abstract_whois_query import WhoisQuery
+from whois_query import WhoisQuery
 
 class ARINQuery(WhoisQuery):
     
