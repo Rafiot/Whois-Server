@@ -76,11 +76,11 @@ if __name__ == "__main__":
     """
     $ time python init_arin.py 
 
-    real	32m46.930s
-    user	12m42.908s
-    sys	2m14.784s
+    real	40m45.703s
+    user	15m28.102s
+    sys	3m6.500s
 
-    12197608 keys
+    14261242 keys
     """
     arin = InitARIN()
     arin.start()

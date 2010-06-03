@@ -45,20 +45,20 @@ class InitRIPE(InitWhoisServer):
 
     keys =  {
          inetnum       : [] ,
-         domain        : [] ,
+#         domain        : [] ,
          inet6num      : [] ,
          aut_num       : [] ,
          route         : [] ,
          route6        : [] ,
-         as_block      : [] , #FIXME: Not used for now.
+#         as_block      : [] , #FIXME: Not used for now.
          as_set        : [] ,
          rtr_set       : [] ,
          route_set     : [] ,
-         poetic_form   : [] ,
-         poem          : [] ,
+#         poetic_form   : [] ,
+#         poem          : [] ,
          peering_set   : [] ,
-         limerick      : [] ,
-         key_cert      : [] ,
+#         limerick      : [] ,
+#         key_cert      : [] ,
          inet_rtr      : [] ,
          filter_set    : [] , 
         #Dummy
@@ -72,7 +72,7 @@ class InitRIPE(InitWhoisServer):
     range_keys = [ inetnum , inet6num ]  
 
     archive_name = "ripe.db.dummy.gz"
-    dump_name = "ripe.dummy.person"
+    dump_name = "ripe.db.dummy"
     serial = "RIPE.CURRENTSERIAL"
 
     def __init__(self):
@@ -204,5 +204,13 @@ class InitRIPE(InitWhoisServer):
 
 
 if __name__ == "__main__":
+	"""
+	real	48m39.926s
+	user	21m28.861s
+	sys	3m32.661s
+
+	 15496753 keys
+	"""
+
     ripe = InitRIPE()
     ripe.start()

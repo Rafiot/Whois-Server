@@ -61,7 +61,7 @@ class InitWhoisServer:
         main_key = redis_key + flag
         for elt in mylist:
             self.redis_whois_server.sadd(main_key, elt)
-            self.redis_whois_server.sadd(elt + subkey, redis_key)
+#            self.redis_whois_server.sadd(elt + subkey, redis_key)
         
         ## I thought it would be faster... it seems not !
 #        pipeline = self.redis_whois_server.pipeline()
