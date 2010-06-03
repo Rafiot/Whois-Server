@@ -204,13 +204,12 @@ class InitRIPE(InitWhoisServer):
 
 
 if __name__ == "__main__":
-	"""
-	real	48m39.926s
-	user	21m28.861s
-	sys	3m32.661s
+    """
+    real	48m39.926s
+    user	21m28.861s
+    sys	3m32.661s
 
-	 15496753 keys
-	"""
-
+    15496753 keys
+    """
     ripe = InitRIPE()
     ripe.start()

@@ -30,10 +30,10 @@ class WhoisQuery():
     
     def whois_asn(self, query):
         to_return = self.redis_whois_server.get(query)
-        if not to_return:
+        if to_return is None:
             to_return = 'ASN not found.'
-#        else:
-#            to_return += self.get_all_informations(query)
+        else:
+            to_return += self.get_all_informations(query)
         return to_return
 
     def __find_best_range(self, ip):
