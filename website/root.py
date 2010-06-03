@@ -21,22 +21,25 @@ from queries.whois_query import *
 class Root(object):
     query_form = \
                 """
-                Please send a query
+                Please enter your query
                 <form method="POST" action=".">
-                  <input type="text" name="query" value="IP or AS Number">
+                  <input type="text" name="query" value="$query">
                   <input type="submit" value="Submit">
                 </form> <br/>
                 """
 
     def index(self, query = ""):
-        if query:
+        if query == "":
+            query = 'IP or AS Number'
+            template = Template(self.query_form)
+        else:
             entry = self.query_db(query)
             template = Template(self.query_form + "Your last query was $query.")
-            template.query = query
-            to_return = str(template) + '<br/>' + '<pre>' + entry + '</pre>'
-            return to_return
-        else:
-            return self.query_form
+        template.query = query
+        to_return = str(template)
+        if entry is not None:
+            to_return += '<br/>' + '<pre>' + entry + '</pre>'
+        return to_return
     index.exposed = True
     
     def query_db(self, query):
