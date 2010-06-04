@@ -119,7 +119,15 @@ class InitWhoisServer:
 #                hex_first += 1
 #            i += 1
 #        else:
-        intermediate.append(key)
+        if key == '':
+            hex_first = int('0x' + first_index[0], 16)
+            hex_last = int('0x' + last_index[0], 16)
+            while hex_first <= hex_last:
+                key_end = ('%X' % hex_first).lower()
+                intermediate.append(key_end)
+                hex_first += 1
+        else:
+            intermediate.append(key)
         return intermediate
 
     def __init__(self):

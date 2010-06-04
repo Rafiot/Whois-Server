@@ -16,6 +16,8 @@ class WhoisServer(SocketServer.BaseRequestHandler ):
         query_maker = WhoisQuery(int(config.get('whois_server','redis_db')))
         while 1:
             query = self.request.recv(1024).strip()
+            if query == '':
+                continue
             ip = None
             try:
                 ip = IPy.IP(query)
