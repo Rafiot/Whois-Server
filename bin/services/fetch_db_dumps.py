@@ -3,7 +3,7 @@ import os
 import sys
 import ConfigParser
 config = ConfigParser.RawConfigParser()
-config.read("../bgp-ranking.conf")
+config.read("../../etc/whois-server.conf")
 whois_dir = os.path.join(config.get('global','root'),config.get('global','whois_db'))
 
 import filecmp
