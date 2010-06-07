@@ -4,21 +4,22 @@
 import os 
 import sys
 import ConfigParser
+config = ConfigParser.RawConfigParser()
+config.read("../../etc/whois-server.conf")
+root_dir =  config.get('global','root')
+sys.path.append(os.path.join(root_dir,config.get('global','lib')))
+
+whois_db = os.path.join(root_dir, config.get('global','whois_db'))
+unpack_dir = os.path.join(root_dir, config.get('whois_server','unpack_dir'))
+use_tmpfs = int(config.get('whois_server','use_tmpfs'))
+
 
 import re
 import redis 
 from abc import ABCMeta, abstractmethod
 
-config = ConfigParser.RawConfigParser()
-config.read("../../etc/whois-server.conf")
-root_dir =  config.get('global','root')
-whois_db = os.path.join(root_dir, config.get('global','whois_db'))
-unpack_dir = os.path.join(root_dir, config.get('whois_server','unpack_dir'))
-use_tmpfs = int(config.get('whois_server','use_tmpfs'))
-sys.path.append(os.path.join(root_dir,config.get('global','lib')))
-
+# key incremented for each new ip range
 uniq_range_id = 'range_id'
-
 
 class InitWhoisServer:
     """
@@ -62,12 +63,7 @@ class InitWhoisServer:
         for elt in mylist:
             self.redis_whois_server.sadd(main_key, elt)
 #            self.redis_whois_server.sadd(elt + subkey, redis_key)
-        
-        ## I thought it would be faster... it seems not !
-#        pipeline = self.redis_whois_server.pipeline()
-#        for elt in mylist:
-#            pipeline = pipeline.sadd(main_key, elt).sadd(elt + subkey, redis_key)
-#        pipeline.execute()
+
 
     def __intermediate_sets_v4(self, first_set, last_set):
         intermediate = []
@@ -110,15 +106,6 @@ class InitWhoisServer:
             i += 1
             if i == len(first_index) or i == len(last_index):
                 break
-#        if i < len(first_index) and i < len(last_index) and first_index[i] != '' and last_index[i] != '':
-#            hex_first = int('0x' + first_index[i], 16)
-#            hex_last = int('0x' + last_index[i], 16)
-#            while hex_first <= hex_last:
-#                key_end = ('%X' % hex_first).lower()
-#                intermediate.append(key + ':' + key_end)
-#                hex_first += 1
-#            i += 1
-#        else:
         if key == '':
             hex_first = int('0x' + first_index[0], 16)
             hex_last = int('0x' + last_index[0], 16)

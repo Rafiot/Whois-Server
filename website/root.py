@@ -4,19 +4,16 @@ import os
 import cherrypy
 from Cheetah.Template import Template
 
-
-APPDIR = os.path.dirname(os.path.abspath(__file__))
-INI_FILENAME = os.path.join(APPDIR, "config/cptest.ini")
-
 import ConfigParser
 import sys
 config = ConfigParser.RawConfigParser()
 config.read("../etc/whois-server.conf")
+root_dir =  config.get('global','root')
+sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 
-server_root_dir =  config.get('global','root')
-sys.path.append(os.path.join(server_root_dir,config.get('global','lib')))
+config_file = config.get('web','config_file')
+
 from queries.whois_query import *
-
 
 class Root(object):
     query_form = \
@@ -29,6 +26,7 @@ class Root(object):
                 """
 
     def index(self, query = ""):
+        entry = None
         if query == "":
             query = 'IP or AS Number'
             template = Template(self.query_form)
@@ -58,12 +56,5 @@ class Root(object):
         return to_return
 
 
-root = Root()
-
-
-def main():
-    cherrypy.quickstart(Root(), config = INI_FILENAME)
-
-
 if __name__ == "__main__":
-    main()
+    cherrypy.quickstart(Root(), config = config_file)

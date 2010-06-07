@@ -6,18 +6,41 @@ import os
 import sys
 import ConfigParser
 config = ConfigParser.RawConfigParser()
-config.read("../bgp-ranking.conf")
+config.read("../whois-server.conf")
 root_dir = config.get('global','root')
 sys.path.append(os.path.join(root_dir,config.get('global','lib')))
+
 services_dir = os.path.join(root_dir,config.get('global','services'))
+pid_path = os.path.join(root_dir,config.get('global','pids'))
 
 import signal
-
-from helpers.initscript import *
+import subprocess
 
 """
 Launch the fetching of the whois databases
 """
+
+def service_start_once(servicename = None, param = None, processname = None):
+    processname = os.path.basename(processname)
+    pidpath = os.path.join(pid_path,processname+".pid")
+    if not os.path.exists(pidpath):
+        proc = service_start(servicename, param)
+        writepid(processname, proc)
+    else:
+        print(param + ' already running on pid ' + str(pidof(processname)[0]))
+
+def service_start(servicename = None, param = None):
+    """
+    Launch a Process
+    """
+    if servicename is not None :
+        service = servicename+".py"
+        if not param:
+            proc =  subprocess.Popen(["python",service])
+        else:
+            proc =  subprocess.Popen(["python",service, param])
+        return proc
+    return False
 
 service = os.path.join(services_dir, "fetch_db_dumps")
 

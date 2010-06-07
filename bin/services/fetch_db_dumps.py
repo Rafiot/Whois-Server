@@ -1,27 +1,21 @@
 #!/usr/bin/python
-
-import datetime
-import filecmp
-import glob
-import time
-
-try:
-    import urllib.request, urllib.parse, urllib.error
-except ImportError:
-    import urllib
 import os 
 import sys
 import ConfigParser
 config = ConfigParser.RawConfigParser()
 config.read("../bgp-ranking.conf")
 whois_dir = os.path.join(config.get('global','root'),config.get('global','whois_db'))
-    
+
+import filecmp
+import time
+import urllib
+
 """
 Fetch the db dump
 """
 
-temporary_dir = os.path.join(whois_dir, 'temp')
-sleep_timer = 5
+
+sleep_timer = int(config.get('global','sleep_timer'))
 
 def usage():
     print "fetch_db_dumps.py serial url"
@@ -33,9 +27,12 @@ if len(sys.argv) < 2:
 args = sys.argv[1].split(' ')
 serial_name = os.path.basename(args[0])
 db_name = os.path.basename(args[1])
+
+temporary_dir = os.path.join(whois_dir, 'temp')
 temporary_serial_file = os.path.join(temporary_dir, serial_name)
-serial_file = os.path.join(whois_dir, serial_name)
 temporary_db_file = os.path.join(temporary_dir, db_name)
+
+serial_file = os.path.join(whois_dir, serial_name)
 db_file = os.path.join(whois_dir, db_name)
 
 while 1:
