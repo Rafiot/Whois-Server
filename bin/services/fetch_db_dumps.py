@@ -28,7 +28,7 @@ args = sys.argv[1].split(' ')
 serial_name = os.path.basename(args[0])
 db_name = os.path.basename(args[1])
 
-temporary_dir = os.path.join(whois_dir, 'temp')
+temporary_dir = os.path.join(whois_dir, config.get('whois_server','temp_dir'))
 temporary_serial_file = os.path.join(temporary_dir, serial_name)
 temporary_db_file = os.path.join(temporary_dir, db_name)
 
