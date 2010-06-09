@@ -62,6 +62,7 @@ class InitWhoisServer:
         main_key = redis_key + flag
         for elt in mylist:
             self.redis_whois_server.sadd(main_key, elt)
+            self.total_keys +=1
 #            self.redis_whois_server.sadd(elt + subkey, redis_key)
 
 
@@ -118,6 +119,8 @@ class InitWhoisServer:
         return intermediate
 
     def __init__(self):
+        self.total_keys = 0
+        self.total_main_keys = 0
         if use_tmpfs:
             tmpfs_size = config.get('whois_server','tmpfs_size')
             if not os.path.ismount(unpack_dir):
@@ -197,4 +200,6 @@ class InitWhoisServer:
         intermediate_sets = self.__intermediate_sets(first, last, ipv4)
         for intermediate_set in intermediate_sets:
             self.redis_whois_server.sadd(intermediate_set, range_key)
+            self.total_keys +=1
         self.redis_whois_server.set(range_key, net_key)
+        self.total_keys +=1

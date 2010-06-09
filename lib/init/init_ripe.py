@@ -1,5 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os 
+import sys
+import ConfigParser
+config = ConfigParser.RawConfigParser()
+config.read("../../etc/whois-server.conf")
+root_dir =  config.get('global','root')
+sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 
 from abstract_init_whois_server import *
 from parsers.ripe_whois_parser import *
@@ -10,6 +17,12 @@ import os
 import redis
 import re
 import IPy
+
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S',
+                    filename=os.path.join(root_dir,config.get('global','logfile_RIPE')))
 
 class InitRIPE(InitWhoisServer):
     inetnum = '^inetnum:'
@@ -76,6 +89,9 @@ class InitRIPE(InitWhoisServer):
     serial = "RIPE.CURRENTSERIAL"
 
     def __init__(self):
+        logging.info('============================')
+        logging.info('Pushing new database.')
+        self.begin = datetime.datetime.now()
         InitWhoisServer.__init__(self)
         self.serial = os.path.join(whois_db,self.serial)
         self.last_parsed_serial = os.path.join(whois_db, self.serial + "_last")
@@ -183,9 +199,10 @@ class InitRIPE(InitWhoisServer):
     # We need a particular push function: some of the 'keys' are not really keys... : 
     # person is a name, and role is... something we want the nic-hdl:person and nic-hdl:role as key into redis
     def push_into_db(self):
+        intermediate_keys = self.total_keys
+        logging.debug('Pushing ' + str(self.pending_keys) + ' main keys...')
         self.redis_whois_server = redis.Redis(db=int(config.get('whois_server','redis_db')) )
         for key, entries in self.keys.iteritems():
-#            print('Begin' + key)
             while len(entries) > 0 :
                 redis_key = ''
                 entry = entries.pop()
@@ -200,7 +217,12 @@ class InitRIPE(InitWhoisServer):
                     redis_key = re.findall(key + '[\s]*([^\s]*)', entry)[0]
                     self.redis_whois_server.set(redis_key, entry)
                 self.push_helper_keys(key, redis_key, entry)
+        self.total_main_keys += self.pending_keys
         self.pending_keys = 0
+        logging.debug('...' + str(self.total_keys - intermediate_keys) + ' keys pushed.')
+        logging.debug(str(self.total_main_keys) + ' main keys pushed until now.')
+        logging.info(str(self.total_keys) + ' keys pushed until now.')
+        logging.info('Running since ' + str(datetime.datetime.now() - self.begin))
 
 
 if __name__ == "__main__":
