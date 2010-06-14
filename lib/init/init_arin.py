@@ -16,11 +16,8 @@ from parsers.arin_whois_parser import *
 import IPy
 import redis
 
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=os.path.join(root_dir,config.get('global','logfile_ARIN')))
+import syslog
+syslog.openlog('Init_ARIN', syslog.LOG_PID, syslog.LOG_USER)
 
 
 class InitARIN(InitWhoisServer):
@@ -48,8 +45,8 @@ class InitARIN(InitWhoisServer):
     dump_name = "arin_db.txt"
 
     def __init__(self):
-        logging.info('============================')
-        logging.info('Pushing new database.')
+        syslog.syslog(syslog.LOG_INFO, '============================')
+        syslog.syslog(syslog.LOG_INFO, 'Pushing new database.')
         self.begin = datetime.datetime.now()
         InitWhoisServer.__init__(self)
 
@@ -75,7 +72,7 @@ class InitARIN(InitWhoisServer):
 
     def push_into_db(self):
         intermediate_keys = self.total_keys
-        logging.debug('Pushing ' + str(self.pending_keys) + ' main keys...')
+        syslog.syslog(syslog.LOG_DEBUG, 'Pushing ' + str(self.pending_keys) + ' main keys...')
         self.redis_whois_server = redis.Redis(db=int(config.get('whois_server','redis_db')) )
         for key, entries in self.keys.iteritems():
             while len(entries) > 0 :
@@ -89,10 +86,10 @@ class InitARIN(InitWhoisServer):
                 self.push_helper_keys(key, redis_key, entry)
         self.total_main_keys += self.pending_keys
         self.pending_keys = 0
-        logging.debug('...' + str(self.total_keys - intermediate_keys) + ' keys pushed.')
-        logging.debug(str(self.total_main_keys) + ' main keys pushed until now.')
-        logging.info(str(self.total_keys) + ' keys pushed until now.')
-        logging.info('Running since ' + str(datetime.datetime.now() - self.begin))
+        syslog.syslog(syslog.LOG_DEBUG, '...' + str(self.total_keys - intermediate_keys) + ' keys pushed.')
+        syslog.syslog(syslog.LOG_DEBUG, str(self.total_main_keys) + ' main keys pushed until now.')
+        syslog.syslog(syslog.LOG_INFO, str(self.total_keys) + ' keys pushed until now.')
+        syslog.syslog(syslog.LOG_INFO, 'Running since ' + str(datetime.datetime.now() - self.begin))
 
 
 if __name__ == "__main__":

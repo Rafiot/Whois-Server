@@ -13,12 +13,6 @@ sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 services_dir = os.path.join(root_dir,config.get('global','services'))
 pid_path = os.path.join(root_dir,config.get('global','pids'))
 
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=os.path.join(root_dir,config.get('global','logfile_fetching')))
-
 import signal
 import subprocess
 
@@ -34,7 +28,7 @@ def service_start_once(servicename = None, param = None, processname = None):
         writepid(processname, proc)
     else:
         print(param + ' already running on pid ' + str(pidof(processname)[0]))
-        logging.info(param + ' already running on pid ' + str(pidof(processname)[0]))
+        syslog.syslog(syslog.LOG_INFO, param + ' already running on pid ' + str(pidof(processname)[0]))
 
 def service_start(servicename = None, param = None):
     """
@@ -64,12 +58,12 @@ if len(sys.argv) < 2:
 if sys.argv[1] == "start":
     for name, option in options.iteritems():
         print('Start fetching of ' + name)
-        logging.info('Start fetching of ' + name)
+        syslog.syslog(syslog.LOG_INFO, 'Start fetching of ' + name)
         proc = service_start_once(servicename = service, param = option,  processname = service + name)
 elif sys.argv[1] == "stop":
     for name in options.keys():
         print('Stop fetching of ' + name)
-        logging.info('Stop fetching of ' + name)
+        syslog.syslog(syslog.LOG_INFO, 'Stop fetching of ' + name)
         pid = pidof(processname=service + name)
         if pid:
             pid = pid[0]
@@ -77,10 +71,10 @@ elif sys.argv[1] == "stop":
                 os.kill(int(pid), signal.SIGKILL)
             except OSError, e:
                 print(name +  " unsuccessfully stopped")
-                logging.info(name +  " unsuccessfully stopped")
+                syslog.syslog(syslog.LOG_ERR, name +  " unsuccessfully stopped")
             rmpid(processname=service + name)
         else:
             print('No running fetching processes')
-            logging.info('No running fetching processes')
+            syslog.syslog(syslog.LOG_INFO, 'No running fetching processes')
 else:
     usage()

@@ -6,11 +6,8 @@ config = ConfigParser.RawConfigParser()
 config.read("../../etc/whois-server.conf")
 whois_dir = os.path.join(config.get('global','root'),config.get('global','whois_db'))
 
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=os.path.join(root_dir,config.get('global','logfile_fetching')))
+import syslog
+syslog.openlog('Whois_Server_Fetch_Dumps', syslog.LOG_PID, syslog.LOG_USER)
 
 import filecmp
 import time
@@ -47,10 +44,10 @@ while 1:
     if os.path.exists(serial_file) and filecmp.cmp(temporary_serial_file, serial_file):
         new_db = False
     if new_db:
-        logging.info('New ' + db_name)
+        syslog.syslog(syslog.LOG_INFO, 'New ' + db_name)
         urllib.urlretrieve(args[1], temporary_db_file)
         os.rename(temporary_serial_file, serial_file)
         os.rename(temporary_db_file, db_file)
     else:
-        logging.info('No New' + db_name)
+        syslog.syslog(syslog.LOG_INFO, 'No New' + db_name)
     time.sleep(sleep_timer)

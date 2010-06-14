@@ -13,12 +13,6 @@ sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 services_dir = os.path.join(root_dir,config.get('global','services'))
 pid_path = os.path.join(root_dir,config.get('global','pids'))
 
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=os.path.join(root_dir,config.get('global','logfile_server')))
-
 import signal
 import subprocess
 
@@ -47,28 +41,22 @@ if len(sys.argv) < 2:
 service = 'whois_server'
 
 if sys.argv[1] == "start":
-
-    print "Start sorting..."
-    logging.info("Start sorting...")
-    print service+" to start..."
-    logging.info(service + " to start...")
+    print service + " to start..."
+    syslog.syslog(syslog.LOG_INFO, service + " to start...")
     proc = service_start(servicename = service)
     writepid(processname = service, proc = proc)
 
 elif sys.argv[1] == "stop":
-
-    print "Stop sorting..."
-    logging.info("Stop sorting...")
     pids = pidof(processname=service)
     if pids:
-        print service+" to be stopped..."
-        logging.info(service + " to be stopped...")
+        print service + " to be stopped..."
+        syslog.syslog(syslog.LOG_INFO, service + " to be stopped...")
         for pid in pids:
             try:
                 os.kill(int(pid), signal.SIGKILL)
             except OSError, e:
-                print service+  " unsuccessfully stopped"
-                logging.info(service +  " unsuccessfully stopped")
+                print service + " unsuccessfully stopped"
+                syslog.syslog(syslog.LOG_ERR, service +  " unsuccessfully stopped")
         rmpid(processname=service)
 
 else:

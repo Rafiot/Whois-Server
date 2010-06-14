@@ -9,6 +9,9 @@ pid_path = os.path.join(root_dir,config.get('global','pids'))
 import os
 import subprocess
 
+import syslog
+syslog.openlog('Whois_Server', syslog.LOG_PID, syslog.LOG_USER)
+
 """
 Standard functions used by the init scripts
 """
