@@ -41,7 +41,7 @@ class WhoisServer(SocketServer.BaseRequestHandler ):
                response = query_maker.whois_asn(query)
             if queries % 10 == 0:
                 syslog.syslog(syslog.LOG_INFO, self.client_address[0] + ' made ' + str(queries) + ' queries.')
-            self.request.send(response + '\n')
+            self.request.send(response + '\n\n')
 
 
 
