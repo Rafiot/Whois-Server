@@ -15,6 +15,8 @@ pid_path = os.path.join(root_dir,config.get('global','pids'))
 
 import signal
 import subprocess
+import syslog
+from helpers.initscript import *
 
 """
 Launch the fetching of the whois databases
