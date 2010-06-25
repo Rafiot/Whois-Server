@@ -31,7 +31,7 @@ class WhoisQuery():
     def whois_asn(self, query):
         to_return = self.redis_whois_server.get(query)
         if to_return is None:
-            to_return = 'ASN not found.'
+            to_return = 'ASN not found.\n'
         else:
             to_return += self.get_all_informations(query)
         return to_return
@@ -83,7 +83,7 @@ class WhoisQuery():
         key = self.__find_best_range(ip)
         to_return = ''
         if not key:
-            to_return += 'IP ' + str(ip) + ' not found.'
+            to_return += 'IP ' + str(ip) + ' not found.\n'
         else:
             to_return += self.redis_whois_server.get(key)
             to_return += self.get_all_informations(key)
