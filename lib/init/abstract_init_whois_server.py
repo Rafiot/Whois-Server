@@ -34,7 +34,7 @@ class InitWhoisServer:
     - dump_name: the name of the db dump, extracted
     """
     
-    max_pending_keys = 500000
+    max_pending_keys = 100000
     pending_keys = 0
     
     __metaclass__ = ABCMeta    
@@ -165,6 +165,7 @@ class InitWhoisServer:
                     self.push_into_db()
             else :
                 entry += line
+        self.push_into_db()
     
     def clean_system(self):
         if use_tmpfs:
