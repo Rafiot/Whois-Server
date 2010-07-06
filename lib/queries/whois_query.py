@@ -54,12 +54,13 @@ class WhoisQuery():
         for range in ranges:
             splitted = range.split('_')
             ip_int = ip.int()
-            if best_range is not None:
-                br_splitted = best_range.split('_')
-                if int(splitted[0]) > int(br_splitted[0]) and int(splitted[1]) < int( br_splitted[1]):
+            if int(splitted[0]) <= ip_int and int(splitted[1]) >= ip_int:
+                if best_range is not None:
+                    br_splitted = best_range.split('_')
+                    if int(splitted[0]) > int(br_splitted[0]) and int(splitted[1]) < int( br_splitted[1]):
+                        best_range = range
+                else:
                     best_range = range
-            elif int(splitted[0]) <= ip_int and int(splitted[1]) >= ip_int:
-                best_range = range
         if best_range is not None:
             to_return = self.redis_whois_server.get(best_range)
         return to_return

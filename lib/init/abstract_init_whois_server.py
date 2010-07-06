@@ -65,7 +65,6 @@ class InitWhoisServer:
             self.total_keys +=1
 #            self.redis_whois_server.sadd(elt + subkey, redis_key)
 
-
     def __intermediate_sets_v4(self, first_set, last_set):
         intermediate = []
         first_index = first_set.split('.')
@@ -73,19 +72,27 @@ class InitWhoisServer:
         if first_index[0] != last_index[0]:
             # push each values between first and last (first and last excluded) 
             intermediate = self.__intermediate_between(int(first_index[0])+ 1 , int(last_index[0]) - 1)
-            # push each values from first_index[0].first_index[1] to first_index[0].255
-            intermediate += self.__intermediate_to_last(first_index[1], first_index[0] + '.')
-            # push each values from last_index[0].0 to last_index[0].last_index[1]
-            intermediate += self.__intermediate_to_last(last_index[1], last_index[0] + '.')
+            if first_index[1] == '0' and last_index[1] == '255':
+                intermediate.append(first_index[0])
+                intermediate.append(last_index[0])
+            else:
+                # push each values from first_index[0].first_index[1] to first_index[0].255
+                intermediate += self.__intermediate_to_last(first_index[1], first_index[0] + '.')
+                # push each values from last_index[0].0 to last_index[0].last_index[1]
+                intermediate += self.__intermediate_to_last(last_index[1], last_index[0] + '.')
         elif first_index[0] == last_index[0] and first_index[1] == '0' and last_index[1] == '255':
             intermediate.append(first_index[0])
         elif first_index[1] != last_index[1]:
             # push each values between first and last (first and last excluded) 
             intermediate = self.__intermediate_between(int(first_index[1])+ 1 , int(last_index[1]) - 1, first_index[0] + '.')
-            # push each values from first_index[0].first_index[1].first_index[2] to first_index[0].first_index[1].255
-            intermediate += self.__intermediate_to_last(first_index[2], first_index[0] + '.' + first_index[1] + '.')
-            # push each values from last_index[0].last_index[1].0 to last_index[0].last_index[1].last_index[2]
-            intermediate += self.__intermediate_to_last(last_index[2], last_index[0] + '.' + last_index[1] + '.')
+            if first_index[2] == '0' and last_index[2] == '255':
+                intermediate.append(first_index[0] + '.' + first_index[1])
+                intermediate.append(first_index[0] + '.' + last_index[1])
+            else:
+                # push each values from first_index[0].first_index[1].first_index[2] to first_index[0].first_index[1].255
+                intermediate += self.__intermediate_to_last(first_index[2], first_index[0] + '.' + first_index[1] + '.')
+                # push each values from last_index[0].last_index[1].0 to last_index[0].last_index[1].last_index[2]
+                intermediate += self.__intermediate_to_last(last_index[2], last_index[0] + '.' + last_index[1] + '.')
         elif first_index[1] == last_index[1] and first_index[2] == '0' and last_index[2] == '255':
             intermediate.append(first_index[0] + '.' + first_index[1])
         elif first_index[2] != last_index[2]:
