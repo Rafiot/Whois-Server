@@ -18,6 +18,9 @@ import re
 import redis 
 from abc import ABCMeta, abstractmethod
 
+from helpers.files_splitter import *
+from multiprocessing import Process
+
 # key incremented for each new ip range
 uniq_range_id = 'range_id'
 
@@ -135,20 +138,18 @@ class InitWhoisServer:
                 os.popen('mount -t tmpfs -o size=' + tmpfs_size + ' tmpfs ' + unpack_dir)
         self.extracted = os.path.join(unpack_dir,self.dump_name)
 
-    def start(self):
-#        self.prepare()
-        self.dispatch_by_key()
-        self.push_into_db()
-        self.clean_system()
+    def split(self):
+        self.fs = FilesSplitter(self.extracted, int(config.get('global','init_processes')))
+        return self.fs.fplit()
     
     def prepare(self):
         archive = os.path.join(self.whois_db,self.archive_name)
         os.popen('gunzip -c ' + archive + ' > ' + self.extracted)
     
-    def dispatch_by_key(self):
-        file = open(self.extracted)
+    def dispatch_by_key(self, file):
         entry = ''
-        for line in file:
+        f = open(file)
+        for line in f:
             if line == '\n':
                 if len(entry) > 0 and re.match('^#', entry) is None:
                     first_word = '^' + re.findall('(^[^\s]*).*',entry)[0]

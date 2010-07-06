@@ -91,7 +91,6 @@ class InitARIN(InitWhoisServer):
         syslog.syslog(syslog.LOG_INFO, str(self.total_keys) + ' keys pushed until now.')
         syslog.syslog(syslog.LOG_INFO, 'Running since ' + str(datetime.datetime.now() - self.begin))
 
-
 if __name__ == "__main__":
     """
     $ time python init_arin.py 
@@ -103,4 +102,14 @@ if __name__ == "__main__":
     14261242 keys
     """
     arin = InitARIN()
-    arin.start()
+    files = arin.split()
+    processes = []
+    for file in files:
+        p = Process(target=arin.dispatch_by_key, args=(file,))
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
+    arin.push_into_db()
+    arin.clean_system()
+
