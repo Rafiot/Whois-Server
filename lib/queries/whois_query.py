@@ -40,11 +40,12 @@ class WhoisQuery():
         to_return = None
         ranges = None
         key = str(ip)
+        if self.ipv4 :
+            regex = '.*[.]'
+        else: 
+            regex = '.*[:]'
         while not ranges:
-            if self.ipv4 :
-                key = re.findall('.*[.]', key)
-            else: 
-                key = re.findall('.*[:]', key)
+            key = re.findall(regex, key)
             if len(key) != 0:
                key = key[0][:-1]
             else:
