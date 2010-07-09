@@ -232,4 +232,13 @@ if __name__ == "__main__":
     15496753 keys
     """
     ripe = InitRIPE()
-    ripe.start()
+    files = ripe.split()
+    processes = []
+    for file in files:
+        p = Process(target=ripe.dispatch_by_key, args=(file,))
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
+    ripe.push_into_db()
+    ripe.clean_system()

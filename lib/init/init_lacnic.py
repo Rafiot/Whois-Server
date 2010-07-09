@@ -91,15 +91,15 @@ if __name__ == "__main__":
 
     14261242 keys
     """
-    arin = InitLACNIC()
-    files = arin.split()
+    lacnic = InitLACNIC()
+    files = lacnic.split()
     processes = []
     for file in files:
-        p = Process(target=arin.dispatch_by_key, args=(file,))
+        p = Process(target=lacnic.dispatch_by_key, args=(file,))
         p.start()
         processes.append(p)
     for p in processes:
         p.join()
-    arin.push_into_db()
-    arin.clean_system()
+    lacnic.push_into_db()
+    lacnic.clean_system()
 
