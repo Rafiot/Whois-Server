@@ -4,8 +4,7 @@
 # =>  http://code.google.com/p/pywhois/source/browse/trunk/pywhois/parser.py
 
 import re
-
-regex_ending = ':[\s]*([^{#\n]*)'
+from whois_parsers import *
 
 # Dict entries 
 mnt_by      = { 'mnt_by'    : '\nmnt-by' + regex_ending }       # mntner
@@ -39,62 +38,23 @@ i6num       = { 'inet6num'  : '^inet6num' + regex_ending }
 org         = { 'org'       : '\norg' + regex_ending }          # organisation
 form        = { 'form'      : '\nform' + regex_ending }         # poetic-form
 
-all_possible_keys = {}
-
-all_possible_keys.update(mnt_by) 
-all_possible_keys.update(mnt_lower)
-all_possible_keys.update(mnt_routes) 
-all_possible_keys.update(mnt_ref) 
-all_possible_keys.update(mntners) 
-
-all_possible_keys.update(mnt_irt) 
-
-all_possible_keys.update(tech_c) 
-all_possible_keys.update(admin_c) 
-all_possible_keys.update(author)
-all_possible_keys.update(zone_c)
-all_possible_keys.update(persons) 
-
-all_possible_keys.update(inum)
-all_possible_keys.update(i6num)
-
-all_possible_keys.update(origin)
-all_possible_keys.update(members)
-all_possible_keys.update(local_as)
-all_possible_keys.update(aut_nums)
-
-
-all_possible_keys.update(org)
-all_possible_keys.update(form)
-
-class RIPEWhois():
-    """
-    This class return a dump of the Whois. 
-    Til we have a real implementation of whois in python, 
-    we will use this class to return all the informations
-    """
-
-    def __init__(self, text):
-        self.text = text
-        self._whois_regs = all_possible_keys
-    
-    def __getattr__(self, attr):
-        """The first time an attribute is called it will be calculated here.
-        The attribute is then set to be accessed directly by subsequent calls.
-        """
-        to_return = getattr(self.__class__, attr, None)
-        if to_return is None:
-            whois_reg = self._whois_regs.get(attr, None)
-            if whois_reg is not None:
-                value = re.findall(whois_reg, self.text)
-                if len(value) == 0 :
-                    setattr(self, attr, None)
-                else:
-                    setattr(self, attr, value)
-                to_return = getattr(self, attr)
-            else:
-                print("Unknown attribute: %s" % attr)
-        return to_return
-    
-    def __repr__(self):
-        return self.text
+ripe = {}
+ripe.update(mnt_by) 
+ripe.update(mnt_lower)
+ripe.update(mnt_routes) 
+ripe.update(mnt_ref) 
+ripe.update(mntners) 
+ripe.update(mnt_irt) 
+ripe.update(tech_c) 
+ripe.update(admin_c) 
+ripe.update(author)
+ripe.update(zone_c)
+ripe.update(persons) 
+ripe.update(inum)
+ripe.update(i6num)
+ripe.update(origin)
+ripe.update(members)
+ripe.update(local_as)
+ripe.update(aut_nums)
+ripe.update(org)
+ripe.update(form)

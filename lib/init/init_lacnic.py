@@ -11,7 +11,7 @@ sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 import datetime
 
 from abstract_init_whois_server import *
-from parsers.lacnic_whois_parser import *
+from parsers.parsers import *
 
 import IPy
 import redis
@@ -43,7 +43,7 @@ class InitLACNIC(InitWhoisServer):
         InitWhoisServer.__init__(self)
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = LACNICWhois(entry)
+        parser = Whois(entry, 'lacnic')
         if key == self.inetnum:
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]

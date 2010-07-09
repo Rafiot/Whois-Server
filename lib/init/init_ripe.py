@@ -9,7 +9,7 @@ root_dir =  config.get('global','root')
 sys.path.append(os.path.join(root_dir,config.get('global','lib')))
 
 from abstract_init_whois_server import *
-from parsers.ripe_whois_parser import *
+from parsers.parsers import *
 import filecmp
 import shutil
 import datetime
@@ -131,7 +131,7 @@ class InitRIPE(InitWhoisServer):
         return persons
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = RIPEWhois(entry)
+        parser = Whois(entry, ripe)
         subkey = ':' + key[1:-1]
         if key == self.inetnum:
             self.ipv4 = True
