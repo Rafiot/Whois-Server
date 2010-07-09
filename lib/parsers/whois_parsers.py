@@ -22,7 +22,7 @@ class AbstractParser(object):
                 if not value:
                     setattr(self, attr, None)
                 else:
-                    setattr(self, attr, value[0])
+                    setattr(self, attr, value)
                 return getattr(self, attr)
             else:
                 raise KeyError("Unknown attribute: %s" % attr)
