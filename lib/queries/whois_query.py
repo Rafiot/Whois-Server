@@ -99,7 +99,7 @@ if __name__ == "__main__":
     import ConfigParser
     config = ConfigParser.RawConfigParser()
     config.read("../../etc/whois-server.conf")
-    query_maker = WhoisQuery(int(config.get('whois_server','redis_db')))
+    query_maker = WhoisQuery(int(config.get('whois_server','redis_db')), config.get('whois_server','prepend_to_keys'))
     
     def usage():
         print "arin_query.py query"

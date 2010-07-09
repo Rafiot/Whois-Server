@@ -14,6 +14,7 @@ syslog.openlog('Whois_Server_Queries', syslog.LOG_PID, syslog.LOG_USER)
 redis_db = int(config.get('whois_server','redis_db'))
 host = config.get('whois_server','host')
 port = int(config.get('whois_server','port'))
+prepend_to_keys = config.get('whois_server','prepend_to_keys')
 
 import SocketServer
 from queries.whois_query import *
@@ -21,7 +22,7 @@ from queries.whois_query import *
 class WhoisServer(SocketServer.BaseRequestHandler ):
     def handle(self):
         syslog.syslog(syslog.LOG_INFO, self.client_address[0] + ' is connected' )
-        query_maker = WhoisQuery(redis_db)
+        query_maker = WhoisQuery(redis_db, prepend_to_keys)
         queries = 0
         while 1:
             query = self.request.recv(1024).strip()

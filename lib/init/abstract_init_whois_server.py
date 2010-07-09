@@ -24,6 +24,7 @@ from multiprocessing import Process
 
 # key incremented for each new ip range
 uniq_range_id = 'range_id'
+prepend  = config.get('whois_server','prepend_to_keys')
 
 class InitWhoisServer:
     """
@@ -115,7 +116,7 @@ class InitWhoisServer:
         maker = MakeIPKeys(ipv4)
         intermediate_sets = maker.intermediate_sets(first, last)
         for intermediate_set in intermediate_sets:
-            self.redis_whois_server.sadd(intermediate_set, range_key)
+            self.redis_whois_server.sadd(prepend + intermediate_set, range_key)
             self.total_keys +=1
         self.redis_whois_server.set(range_key, net_key)
         self.total_keys +=1
