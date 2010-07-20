@@ -25,8 +25,9 @@ class WhoisQuery():
     
     subkeys = subkeys_arin + subkeys_ripe
     
-    def __init__(self,  redis_db):
+    def __init__(self,  redis_db, prepend_to_keys):
         self.redis_whois_server = redis.Redis(db= redis_db)
+        self.prepend = prepend_to_keys
     
     def whois_asn(self, query):
         to_return = self.redis_whois_server.get(query)
@@ -50,7 +51,7 @@ class WhoisQuery():
                key = key[0][:-1]
             else:
                 break
-            ranges = self.redis_whois_server.smembers(key)
+            ranges = self.redis_whois_server.smembers(self.prepend + key)
         best_range = None
         for range in ranges:
             splitted = range.split('_')
