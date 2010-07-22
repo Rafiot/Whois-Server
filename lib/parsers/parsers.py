@@ -12,8 +12,8 @@ class Whois(AbstractParser):
     we will use this class to return all the informations
     """
     possible_regex = {
-        'arin'   : arin, 
-        'ripe'   : ripe, 
-        'lacnic' : lacnic
+        'whois.arin.net'   : arin, 
+        'whois.ripe.net'   : ripe, 
+        'whois.lacnic.net' : lacnic
         }
 

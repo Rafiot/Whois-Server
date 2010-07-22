@@ -51,7 +51,7 @@ class InitARIN(InitWhoisServer):
         InitWhoisServer.__init__(self)
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = Whois(entry, 'arin')
+        parser = Whois(entry, 'whois.arin.net')
         if key == self.net or key == self.v6net:
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]

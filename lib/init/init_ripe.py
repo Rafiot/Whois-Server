@@ -131,7 +131,7 @@ class InitRIPE(InitWhoisServer):
         return persons
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = Whois(entry, 'ripe')
+        parser = Whois(entry, 'whois.ripe.net')
         subkey = ':' + key[1:-1]
         if key == self.inetnum:
             self.ipv4 = True

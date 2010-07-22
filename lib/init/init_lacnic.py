@@ -43,7 +43,7 @@ class InitLACNIC(InitWhoisServer):
         InitWhoisServer.__init__(self)
 
     def push_helper_keys(self, key, redis_key, entry):
-        parser = Whois(entry, 'lacnic')
+        parser = Whois(entry, 'whois.lacnic.net')
         if key == self.inetnum:
             self.__push_range(parser, redis_key)
         subkey = ':' + key[1:-1]

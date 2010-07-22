@@ -13,7 +13,7 @@ syslog.openlog('Whois_Server_Queries', syslog.LOG_PID, syslog.LOG_USER)
 
 redis_db = int(config.get('whois_server','redis_db'))
 host = config.get('whois_server','host')
-port = int(config.get('whois_server','port'))
+port = int(config.get('whois_server','port_query'))
 prepend_to_keys = config.get('whois_server','prepend_to_keys')
 
 import SocketServer
