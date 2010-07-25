@@ -1,0 +1,19 @@
+----- Abstract -----
+
+The official whois server of the RIPE is opensource but there is not a lot of documentation. 
+It is particulary complicated to compile and use. 
+
+Th goal of this project is to provide a fully featured Whois Server with redis as backend. 
+It will possible to query the server through a redis client but also using the whois protocol. 
+
+--------------------
+
+
+----- Details -----
+
+The Whois database is fully generated everytime we have a new database.
+
+The querying is actually faster than the official whois server.
+
+-------------------
+
